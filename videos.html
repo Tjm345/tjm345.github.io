@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Videos — Thomas's Recipes</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,650&display=swap');
+
+    :root {
+      color-scheme: light dark;
+      --paper: #f7f3eb;
+      --paper-deep: #eee6d8;
+      --ink: #282017;
+      --muted: #6d6256;
+      --line: #d9cebe;
+      --card: #fffdf8;
+      --tomato: #b63c24;
+      --tomato-strong: #8d2b19;
+      --mustard: #e2a72e;
+      --sage: #526b4d;
+      --shadow: 0 18px 45px rgba(73, 49, 28, .12);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper: #1f1b17;
+        --paper-deep: #28221c;
+        --ink: #f7efe2;
+        --muted: #c7baa9;
+        --line: #4b4035;
+        --card: #2b251f;
+        --tomato: #ef7456;
+        --tomato-strong: #ff9479;
+        --mustard: #f2bc4e;
+        --sage: #9fbe96;
+        --shadow: 0 18px 45px rgba(0, 0, 0, .32);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background:
+        linear-gradient(90deg, transparent 49.8%, color-mix(in srgb, var(--line) 28%, transparent) 50%, transparent 50.2%) 0 0 / 52px 52px,
+        var(--paper);
+      color: var(--ink);
+      font-family: "DM Sans", sans-serif;
+      line-height: 1.55;
+    }
+    button, input { font: inherit; }
+    a { color: inherit; }
+    img { display: block; width: 100%; }
+
+    .page { max-width: 1180px; margin: 0 auto; padding: 36px 28px 72px; }
+
+    .main-nav {
+      display: flex;
+      justify-content: flex-end;
+      gap: 24px;
+      flex-wrap: wrap;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+    .main-nav a {
+      color: var(--tomato-strong);
+      font-weight: 700;
+      text-decoration: underline;
+      text-decoration-color: var(--mustard);
+      text-decoration-thickness: 3px;
+      text-underline-offset: 6px;
+    }
+    .main-nav a:hover { color: var(--tomato); }
+    .main-nav a:focus-visible { outline: 3px solid var(--mustard); outline-offset: 5px; }
+
+    .intro {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(310px, .92fr);
+      gap: 48px;
+      align-items: end;
+      min-height: 410px;
+      padding: 40px 0 50px;
+      border-bottom: 1px solid var(--line);
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 18px;
+      color: var(--tomato);
+      font-size: .82rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .eyebrow::before { content: ""; width: 28px; height: 3px; background: var(--mustard); }
+    h1, h2, h3 { font-family: "Newsreader", Georgia, serif; line-height: 1.03; margin: 0; }
+    h1 { font-size: clamp(3.35rem, 8.5vw, 7.5rem); max-width: 760px; letter-spacing: -.045em; }
+    .intro-copy { max-width: 430px; padding-bottom: 8px; }
+    .intro-copy p { margin: 0; font-size: clamp(1.05rem, 2vw, 1.25rem); color: var(--muted); }
+    .intro-copy strong { color: var(--ink); }
+    .jump {
+      display: inline-flex;
+      margin-top: 24px;
+      color: var(--tomato-strong);
+      font-weight: 700;
+      text-underline-offset: 5px;
+      text-decoration-thickness: 2px;
+    }
+
+    .weekly-spotlight {
+      display: grid;
+      grid-template-columns: minmax(260px, .9fr) minmax(0, 1.1fr);
+      gap: 0;
+      margin: 48px 0 4px;
+      border: 1px solid var(--line);
+      border-top: 7px solid var(--mustard);
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+    .weekly-spotlight img {
+      height: 100%;
+      min-height: 360px;
+      object-fit: cover;
+    }
+    .spotlight-copy { padding: 38px 40px 40px; }
+    .spotlight-label {
+      margin: 0 0 12px;
+      color: var(--tomato);
+      font-size: .82rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .weekly-spotlight h2 { font-size: clamp(2.25rem, 4.7vw, 4rem); }
+    .weekly-spotlight .dek { margin-bottom: 24px; }
+    .weekly-spotlight .quick-facts { margin-top: 22px; }
+    .spotlight-link {
+      display: inline-flex;
+      margin-top: 26px;
+      border-radius: 4px;
+      background: var(--tomato);
+      color: white;
+      padding: 12px 18px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .spotlight-link:hover { background: var(--tomato-strong); }
+    .spotlight-link:focus-visible { outline: 3px solid var(--mustard); outline-offset: 3px; }
+
+    .recipe-tools {
+      display: grid;
+      grid-template-columns: minmax(240px, .65fr) minmax(0, 1.35fr);
+      gap: 28px;
+      align-items: end;
+      padding: 42px 0 2px;
+    }
+    .search-field label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: .8rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .search-field input {
+      width: 100%;
+      min-height: 46px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: var(--card);
+      color: var(--ink);
+      padding: 10px 13px;
+    }
+    .search-field input::placeholder { color: var(--muted); }
+    .search-field input:focus-visible { outline: 3px solid var(--mustard); outline-offset: 2px; }
+    .filter-buttons { display: flex; gap: 9px; flex-wrap: wrap; }
+    .filter-button {
+      appearance: none;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--card);
+      color: var(--ink);
+      padding: 9px 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .filter-button:hover { border-color: var(--tomato); color: var(--tomato-strong); }
+    .filter-button[aria-pressed="true"] { background: var(--tomato); border-color: var(--tomato); color: white; }
+    .filter-button:focus-visible { outline: 3px solid var(--mustard); outline-offset: 2px; }
+    .filter-status { grid-column: 1 / -1; margin: 0; color: var(--muted); min-height: 1.5em; font-size: .9rem; }
+
+    .recipe { padding-top: 56px; }
+    .recipe + .recipe {
+      margin-top: 78px;
+      border-top: 1px solid var(--line);
+      padding-top: 72px;
+    }
+    .recipe.is-first-visible { margin-top: 0; border-top: 0; padding-top: 56px; }
+    .recipe-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(290px, .75fr);
+      gap: 30px;
+      align-items: end;
+      margin-bottom: 22px;
+    }
+    .recipe-number { color: var(--tomato); font-weight: 700; font-size: .9rem; margin: 0 0 10px; }
+    h2 { font-size: clamp(2.25rem, 5vw, 4.6rem); letter-spacing: -.035em; max-width: 850px; }
+    .dek { color: var(--muted); font-size: 1.05rem; margin: 12px 0 0; max-width: 690px; }
+
+    .quick-facts {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .fact { padding: 14px 8px 14px 0; }
+    .fact + .fact { border-left: 1px solid var(--line); padding-left: 16px; }
+    .fact span { display: block; color: var(--muted); font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+    .fact strong { display: block; margin-top: 2px; font-size: .95rem; }
+    .quick-facts.four { grid-template-columns: repeat(2, 1fr); }
+    .quick-facts.four .fact:nth-child(3) { border-left: 0; border-top: 1px solid var(--line); padding-left: 0; }
+    .quick-facts.four .fact:nth-child(4) { border-top: 1px solid var(--line); }
+
+    .hero-photo {
+      aspect-ratio: 3 / 1.55;
+      object-fit: cover;
+      border-radius: 3px 3px 30px 3px;
+      box-shadow: var(--shadow);
+    }
+    .photo-caption { margin: 10px 0 0; color: var(--muted); font-size: .82rem; }
+
+    .recipe-body {
+      display: grid;
+      grid-template-columns: minmax(280px, .72fr) minmax(0, 1.28fr);
+      gap: 70px;
+      padding-top: 52px;
+      align-items: start;
+    }
+    .ingredients {
+      position: sticky;
+      top: 22px;
+      background: var(--card);
+      box-shadow: 8px 8px 0 var(--mustard);
+      border: 1px solid var(--line);
+      padding: 30px;
+    }
+    h3 { font-size: 2rem; letter-spacing: -.02em; }
+    .ingredients ul { list-style: none; padding: 0; margin: 22px 0 0; }
+    .ingredients li { padding: 10px 0; border-top: 1px solid var(--line); }
+    .ingredients li:last-child { border-bottom: 1px solid var(--line); }
+    .ingredients li.ingredient-group { padding-top: 18px; border-top: 0; }
+    .ingredients li.ingredient-group:first-child { padding-top: 2px; }
+    .ingredients li.ingredient-group b { color: var(--ink); font-family: "Newsreader", Georgia, serif; font-size: 1.15rem; }
+    .ingredients b { color: var(--tomato-strong); }
+    .ingredient-check {
+      display: grid;
+      grid-template-columns: 20px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      cursor: pointer;
+    }
+    .ingredient-check input {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      margin: 3px 0 0;
+      border: 2px solid var(--tomato);
+      border-radius: 3px;
+      background: var(--card);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+    .ingredient-check input::before {
+      content: "";
+      width: 9px;
+      height: 5px;
+      border-left: 2px solid white;
+      border-bottom: 2px solid white;
+      transform: rotate(-45deg) scale(0);
+      transition: transform .12s ease;
+    }
+    .ingredient-check input:checked { background: var(--tomato); }
+    .ingredient-check input:checked::before { transform: rotate(-45deg) scale(1); }
+    .ingredient-check input:checked + span { color: var(--muted); text-decoration: line-through; text-decoration-thickness: 1px; }
+    .ingredient-check input:focus-visible { outline: 3px solid var(--mustard); outline-offset: 2px; }
+    .help { margin: 20px 0 0; color: var(--muted); font-size: .9rem; }
+
+    .recipe-video { display: none; }
+    .recipe-video.has-video {
+      display: block;
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      margin-top: 24px;
+      overflow: hidden;
+      border-radius: 3px 3px 24px 3px;
+      background: #000;
+      box-shadow: var(--shadow);
+    }
+    .recipe-video iframe,
+    .recipe-video video {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      object-fit: contain;
+    }
+
+    .method { padding: 4px 0; }
+    .steps { list-style: none; counter-reset: steps; padding: 0; margin: 24px 0 0; }
+    .steps li {
+      counter-increment: steps;
+      position: relative;
+      padding: 0 0 28px 58px;
+      font-size: 1.02rem;
+    }
+    .steps li::before {
+      content: counter(steps);
+      position: absolute;
+      left: 0;
+      top: -3px;
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--tomato);
+      color: white;
+      font-family: "Newsreader", Georgia, serif;
+      font-size: 1.15rem;
+      font-weight: 650;
+    }
+    .steps li:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 17px;
+      top: 38px;
+      bottom: 4px;
+      width: 1px;
+      background: var(--line);
+    }
+    .steps strong { color: var(--tomato-strong); }
+
+    .notes {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+      margin-top: 18px;
+    }
+    .note { border-top: 4px solid var(--sage); padding-top: 14px; }
+    .note h4 { margin: 0 0 6px; font-size: 1rem; }
+    .note p { margin: 0; color: var(--muted); font-size: .92rem; }
+
+    .copy-row { display: flex; align-items: center; gap: 14px; margin-top: 30px; flex-wrap: wrap; }
+    .copy-button {
+      appearance: none;
+      border: 0;
+      background: var(--ink);
+      color: var(--paper);
+      border-radius: 4px;
+      padding: 12px 18px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .copy-button:hover { background: var(--tomato-strong); color: white; }
+    .copy-button:focus-visible { outline: 3px solid var(--mustard); outline-offset: 3px; }
+    .copy-status { color: var(--sage); min-height: 1.5em; font-size: .9rem; }
+
+    .newsletter {
+      margin-top: 64px;
+      padding: 36px;
+      background: var(--sage);
+      color: var(--paper);
+      border-radius: 3px 3px 30px 3px;
+    }
+    .newsletter h3 { font-size: clamp(2rem, 4vw, 3.5rem); }
+    .newsletter p { margin: 8px 0 0; max-width: 620px; color: color-mix(in srgb, var(--paper) 84%, transparent); }
+    .newsletter-form { display: flex; gap: 10px; margin-top: 24px; max-width: 690px; }
+    .newsletter-form label { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+    .newsletter-form input {
+      flex: 1 1 280px;
+      min-width: 0;
+      border: 2px solid transparent;
+      border-radius: 4px;
+      background: var(--card);
+      color: var(--ink);
+      padding: 12px 14px;
+    }
+    .newsletter-form input:focus-visible { outline: 3px solid var(--mustard); outline-offset: 2px; }
+    .newsletter-form button {
+      appearance: none;
+      border: 0;
+      border-radius: 4px;
+      background: var(--mustard);
+      color: #282017;
+      padding: 12px 19px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .newsletter-form button:hover { background: var(--paper); }
+    .newsletter-form button:focus-visible { outline: 3px solid var(--paper); outline-offset: 3px; }
+    .newsletter-status { min-height: 1.5em; margin-top: 12px; color: var(--paper); font-weight: 700; }
+
+    .coming {
+      margin-top: 76px;
+      padding: 34px 0 10px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      gap: 28px;
+      align-items: baseline;
+    }
+    .coming h3 { font-size: clamp(1.7rem, 4vw, 3rem); }
+    .coming p { margin: 0; color: var(--muted); max-width: 430px; }
+
+    @media (max-width: 780px) {
+      .page { padding: 18px 18px 54px; }
+      .main-nav { padding: 4px 0 14px; }
+      .intro { grid-template-columns: 1fr; min-height: auto; gap: 24px; padding: 46px 0 34px; }
+      h1 { font-size: clamp(3.1rem, 17vw, 5.3rem); }
+      .weekly-spotlight { grid-template-columns: 1fr; margin-top: 34px; }
+      .weekly-spotlight img { min-height: 0; aspect-ratio: 4 / 3; }
+      .spotlight-copy { padding: 28px 24px 30px; }
+      .recipe-tools { grid-template-columns: 1fr; gap: 18px; padding-top: 30px; }
+      .recipe { padding-top: 38px; }
+      .recipe.is-first-visible { padding-top: 38px; }
+      .recipe + .recipe { margin-top: 54px; padding-top: 50px; }
+      .recipe-head { grid-template-columns: 1fr; gap: 24px; }
+      .hero-photo { aspect-ratio: 4 / 3; border-radius: 2px 2px 22px 2px; }
+      .recipe-body { grid-template-columns: 1fr; gap: 42px; padding-top: 38px; }
+      .ingredients { position: static; padding: 24px; }
+      .notes { grid-template-columns: 1fr; }
+      .newsletter { margin-top: 48px; padding: 28px 22px; border-radius: 2px 2px 22px 2px; }
+      .newsletter-form { flex-direction: column; }
+      .newsletter-form input { flex-basis: auto; width: 100%; }
+      .newsletter-form button { width: 100%; }
+      .coming { margin-top: 54px; flex-direction: column; align-items: flex-start; }
+    }
+
+    @media (max-width: 400px) {
+      .quick-facts { grid-template-columns: 1fr; }
+      .fact + .fact { border-left: 0; border-top: 1px solid var(--line); padding-left: 0; }
+      .steps li { padding-left: 50px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+    @media print {
+      body { background: white; color: black; }
+      .page { max-width: none; padding: 0; }
+      .intro, .recipe-tools, .hero-photo, .photo-caption, .copy-row, .newsletter, .coming { display: none; }
+      .recipe { padding-top: 0; }
+      .recipe-body { grid-template-columns: .8fr 1.2fr; gap: 36px; padding-top: 24px; }
+      .ingredients { position: static; box-shadow: none; }
+      .steps li { break-inside: avoid; }
+    }
+  
+    .print-button {
+      font: inherit; font-weight: 700; cursor: pointer;
+      background: var(--card); color: var(--tomato-strong);
+      border: 2px solid var(--tomato); border-radius: 999px;
+      padding: 10px 26px; margin-right: 12px;
+    }
+    .print-button:hover { background: var(--tomato); color: #fffdf8; }
+    @media print {
+      body.printing main.page > :not(article.recipe.print-this) { display: none !important; }
+      body.printing article.recipe.print-this button,
+      body.printing article.recipe.print-this input[type="checkbox"],
+      body.printing article.recipe.print-this .recipe-video { display: none !important; }
+      body.printing article.recipe.print-this { display: block !important; }
+    }
+
+  </style>
+<style>
+    .topbar { display: flex; justify-content: space-between; align-items: center; padding: 8px 0 0; }
+    .brand { font-family: "Newsreader", Georgia, serif; font-weight: 650; font-size: 1.25rem; text-decoration: none; }
+    .site-foot { border-top: 1px solid var(--line); margin-top: 56px; padding-top: 32px; color: var(--muted); }
+    .site-foot strong { color: var(--ink); }
+
+    .video-note { max-width: 680px; padding: 40px 0 8px; }
+    .video-note p { font-size: 1.1rem; color: var(--muted); margin: 0 0 20px; }
+    .video-note p strong { color: var(--ink); }
+    .coming-card { background: var(--card); border: 1px dashed var(--line); border-radius: 14px; padding: 48px 32px; margin-top: 24px; text-align: center; color: var(--muted); }
+    .coming-card h3 { font-size: 1.5rem; margin-bottom: 10px; color: var(--ink); }
+    .coming-card p { margin: 0; }
+    .video-slot { margin-top: 24px; }
+
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <a class="brand" href="index.html">Thomas's Recipes</a>
+    <a class="jump" href="index.html">&larr; Back to recipes</a>
+  </div>
+
+  <section class="intro">
+    <div>
+      <p class="eyebrow">Fresh from my kitchen</p>
+      <h1>Watch me cook.</h1>
+    </div>
+    <div class="intro-copy">
+      <p><strong>Step-by-step cooking videos</strong> for my recipes. See it done, then do it yourself.</p>
+    </div>
+  </section>
+
+  <section class="video-note">
+    <p>I'm going to start filming myself cooking so you can <strong>watch exactly how I make everything.</strong></p>
+    <div class="video-slot" id="video-list">
+      <h3>Boiling spaghetti</h3>
+      <p>The start of my <a href="index.html#simple-spaghetti-baked-potato">Simple Spaghetti &amp; Baked Potato</a> — spaghetti going into the pot.</p>
+      <video controls preload="metadata" playsinline style="width:100%;border-radius:14px;background:#000;">
+        <source src="spaghetti-cooking.mp4" type="video/mp4">
+        Your browser can't play this video.
+      </video>
+    </div>
+    <div class="coming-card" style="margin-top:24px;">
+      <h3>More videos on the way</h3>
+      <p>I'm filming more of my recipes. Check back — they'll show up right here.</p>
+    </div>
+  </section>
+
+  <footer class="site-foot">
+    <p><strong>More from my kitchen soon.</strong><br>I'm adding every new recipe I make, one good dish at a time. &mdash; Thomas</p>
+  </footer>
+</div>
+</body>
+</html>
