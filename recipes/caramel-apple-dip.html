@@ -407,8 +407,35 @@
       text-underline-offset: 6px;
     }
   </style>
+
+  <style>
+    .color-bar { height: 8px; border-radius: 0 0 10px 10px; background: linear-gradient(90deg, #e63946, #f4a261, #e9c46a, #2a9d8f, #4361ee, #f72585); }
+    article[data-category="Breakfast"] { border-top-color: #e63946; }
+    article[data-category="Lunch"] { border-top-color: #2a9d4f; }
+    article[data-category="Dinner"] { border-top-color: #7b2cbf; }
+    article[data-category="Dessert"] { border-top-color: #f72585; }
+    article[data-category="Snacks & Sides"] { border-top-color: #f4a261; }
+    article[data-category="Breakfast"] .recipe-number { color: #e63946; }
+    article[data-category="Lunch"] .recipe-number { color: #2a9d4f; }
+    article[data-category="Dinner"] .recipe-number { color: #7b2cbf; }
+    article[data-category="Dessert"] .recipe-number { color: #f72585; }
+    article[data-category="Snacks & Sides"] .recipe-number { color: #d97a16; }
+    @media (prefers-color-scheme: dark) {
+      article[data-category="Breakfast"] { border-top-color: #ff6b6b; }
+      article[data-category="Lunch"] { border-top-color: #51cf66; }
+      article[data-category="Dinner"] { border-top-color: #b197fc; }
+      article[data-category="Dessert"] { border-top-color: #ff8fd8; }
+      article[data-category="Snacks & Sides"] { border-top-color: #ffb84d; }
+      article[data-category="Breakfast"] .recipe-number { color: #ff6b6b; }
+      article[data-category="Lunch"] .recipe-number { color: #51cf66; }
+      article[data-category="Dinner"] .recipe-number { color: #b197fc; }
+      article[data-category="Dessert"] .recipe-number { color: #ff8fd8; }
+      article[data-category="Snacks & Sides"] .recipe-number { color: #ffb84d; }
+    }
+  </style>
 </head>
 <body>
+  <div class="color-bar"></div>
 <div class="page">
   <div class="topbar">
     <a class="brand" href="../index.html">Thomas's Recipes</a>
