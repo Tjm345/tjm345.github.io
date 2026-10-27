@@ -449,6 +449,34 @@
     body { font-family: "Nunito", "DM Sans", sans-serif; }
     h1, h2, h3, .brand-name, .brand-tagline { font-family: "Fredoka", "Newsreader", Georgia, serif; }
   </style>
+<style>
+
+/* tk-features: scaler, cooking mode, favorites, quick filter */
+.tk-scale-row { margin: 12px 0 4px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.tk-scale-label { font-weight: 700; }
+.tk-scale-btn, .tk-cook-btn, .tk-fav { font: inherit; cursor: pointer; border: 2px solid #d9cebe; background: #fffdf8; color: #282017; border-radius: 999px; padding: 6px 14px; font-weight: 700; }
+.tk-scale-btn[aria-pressed="true"], .tk-fav[aria-pressed="true"] { background: #b63c24; border-color: #b63c24; color: #fff; }
+.tk-cook-btn { margin: 0 0 16px; }
+.tk-cook-btn:hover { background: #b63c24; border-color: #b63c24; color: #fff; }
+.tk-fav { margin-left: 10px; }
+.tk-cook-overlay { position: fixed; inset: 0; z-index: 9999; background: rgba(40,32,23,.72); display: none; align-items: center; justify-content: center; padding: 20px; }
+.tk-cook-panel { background: #f7f3eb; color: #282017; max-width: 680px; width: 100%; border-radius: 18px; padding: 28px 26px; box-shadow: 0 24px 60px rgba(0,0,0,.35); position: relative; }
+.tk-cook-close { position: absolute; top: 12px; right: 14px; font-size: 1.6rem; background: none; border: 0; cursor: pointer; color: #282017; line-height: 1; }
+.tk-cook-count { font-weight: 700; color: #b63c24; margin: 0 0 12px; }
+.tk-cook-step { font-size: clamp(1.4rem, 4vw, 2rem); line-height: 1.4; margin: 0 0 24px; }
+.tk-cook-nav { display: flex; gap: 12px; flex-wrap: wrap; }
+.tk-cook-nav button { font: inherit; cursor: pointer; border: 0; border-radius: 999px; padding: 12px 22px; font-weight: 700; background: #b63c24; color: #fff; }
+.tk-cook-nav button:disabled { opacity: .4; cursor: default; }
+.tk-cook-nav button.tk-cook-done { background: #526b4d; }
+.quick-filter-row { margin: 12px 0 4px; }
+.holiday-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin: 24px 0 40px; }
+.holiday-card { background: var(--card); border: 1px solid var(--line); padding: 18px 20px; }
+.holiday-card a { font-weight: 700; text-decoration: none; }
+.holiday-card a:hover { text-decoration: underline; }
+.holiday-card p { margin: 6px 0 0; color: var(--muted); font-size: .92rem; }
+.site-foot { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--line); color: var(--muted); }
+
+</style>
 </head>
 <body>
   <div class="color-bar"></div>
@@ -457,7 +485,7 @@
     <a class="brand" href="../index.html">Thomas's Recipes</a>
     <a class="jump" href="../index.html#loaded-potato-skins">&larr; Back to all recipes</a>
   </div>
-  <nav class="recipe-nav" aria-label="Main pages"><a href="../index.html">Recipes</a><a href="../start-here.html">Start here</a><a href="../cookbook.html">Cookbook</a><a href="../about.html">About</a><a href="../blog.html">Blog</a><a href="../photos.html">Photos</a><a href="../videos.html">Videos</a><a href="../tips.html">Tips</a><a href="../faq.html">FAQ</a><a href="../chat.html">Chat</a></nav>
+  <nav class="recipe-nav" aria-label="Main pages"><a href="../index.html">Recipes</a><a href="../start-here.html">Start here</a><a href="../cookbook.html">Cookbook</a><a href="../about.html">About</a><a href="../blog.html">Blog</a><a href="../photos.html">Photos</a><a href="../videos.html">Videos</a><a href="../tips.html">Tips</a><a href="../faq.html">FAQ</a><a href="../chat.html">Chat</a><a href="../holidays.html">Holidays</a><a href="../favorites.html">Favorites</a></nav>
   <article class="recipe" data-category="Snacks &amp; Sides" id="loaded-potato-skins">
 
       <header class="recipe-head">
@@ -570,5 +598,250 @@
     })();
   </script>
 
+<script>
+
+/* tk-features */
+(function () {
+  var FRAC = {'\u00BD': 0.5, '\u00BC': 0.25, '\u00BE': 0.75, '\u2153': 1 / 3, '\u2154': 2 / 3, '\u215B': 0.125, '\u215C': 0.375, '\u215D': 0.625, '\u215E': 0.875};
+  var AMT_RE = /^(?:(\d+)\s+(\d+)\/(\d+)|(\d+)\/(\d+)|([\u00BD\u00BC\u00BE\u2153\u2154\u215B\u215C\u215D\u215E])|(\d+(?:\.\d+)?))/;
+  function parseOne(s) {
+    var m = s.match(AMT_RE);
+    if (!m) return null;
+    if (m[1]) return { v: parseInt(m[1], 10) + parseInt(m[2], 10) / parseInt(m[3], 10), len: m[0].length };
+    if (m[4]) return { v: parseInt(m[4], 10) / parseInt(m[5], 10), len: m[0].length };
+    if (m[6]) return { v: FRAC[m[6]], len: m[0].length };
+    return { v: parseFloat(m[7]), len: m[0].length };
+  }
+  function splitAmount(text) {
+    var pre = '';
+    var t = text;
+    var pm = t.match(/^\s*(about\s+)/i);
+    if (pm) { pre = pm[1]; t = t.slice(pm[0].length); }
+    var first = parseOne(t);
+    if (!first) return null;
+    var values = [first.v];
+    var rest = t.slice(first.len);
+    var rm = rest.match(/^\s*[\u2013-]\s*/);
+    if (rm) {
+      var rest2 = rest.slice(rm[0].length);
+      var second = parseOne(rest2);
+      if (second) { values.push(second.v); rest = rest2.slice(second.len); }
+    }
+    return { prefix: pre, values: values, rest: rest };
+  }
+  function fmtAmount(v) {
+    if (v <= 0) return '0';
+    var whole = Math.floor(v + 1e-9);
+    var frac = v - whole;
+    var fstr = '';
+    if (Math.abs(frac - 1 / 3) < 0.04) fstr = '\u2153';
+    else if (Math.abs(frac - 2 / 3) < 0.04) fstr = '\u2154';
+    else {
+      var e = Math.round(frac * 8) / 8;
+      if (e >= 1) { whole += 1; e = 0; }
+      var map = { 0: '', 0.125: '\u215B', 0.25: '\u00BC', 0.375: '\u215C', 0.5: '\u00BD', 0.625: '\u215D', 0.75: '\u00BE', 0.875: '\u215E' };
+      fstr = map[e] || '';
+    }
+    if (!fstr) return String(whole);
+    if (whole === 0) return fstr;
+    return whole + ' ' + fstr;
+  }
+  var UNITS = ['pound', 'cup', 'tablespoon', 'teaspoon', 'ounce', 'quart', 'pint', 'egg', 'slice', 'can', 'package', 'clove', 'piece', 'serving'];
+  var NOUNS = ['egg', 'onion', 'banana', 'potato', 'apple', 'carrot', 'pepper', 'tomato', 'avocado', 'lemon', 'lime', 'cucumber', 'zucchini', 'mushroom', 'peach', 'pear', 'orange', 'breast', 'thigh', 'mango'];
+  var ES = { 'potato': 'potatoes', 'tomato': 'tomatoes', 'mango': 'mangoes', 'peach': 'peaches' };
+  function pluralOf(base) { return ES[base] || base + 's'; }
+  function fixUnit(rest, value) {
+    var m = rest.match(/^(\s+)([A-Za-z]+)(.*)$/);
+    if (!m) return rest;
+    var word = m[2].toLowerCase();
+    var base = null;
+    for (var i = 0; i < UNITS.length; i++) {
+      if (word === UNITS[i] || word === pluralOf(UNITS[i])) { base = UNITS[i]; break; }
+    }
+    if (!base) {
+      for (var k = 0; k < NOUNS.length; k++) {
+        if (word === NOUNS[k] || word === pluralOf(NOUNS[k])) { base = NOUNS[k]; break; }
+      }
+    }
+    if (base) {
+      var want = (value > 1) ? pluralOf(base) : base;
+      return m[1] + want + m[3];
+    }
+    var m2 = rest.match(/^(\s+)([A-Za-z]+)(\s+)([A-Za-z]+)(.*)$/);
+    if (m2) {
+      var noun = m2[4].toLowerCase();
+      var nbase = null;
+      for (var j = 0; j < NOUNS.length; j++) {
+        if (noun === NOUNS[j] || noun === pluralOf(NOUNS[j])) { nbase = NOUNS[j]; break; }
+      }
+      if (nbase) {
+        var wantN = (value > 1) ? pluralOf(nbase) : nbase;
+        return m2[1] + m2[2] + m2[3] + wantN + m2[5];
+      }
+    }
+    return rest;
+  }
+  function scaleText(el, factor) {
+    var orig = el.getAttribute('data-tk-orig');
+    if (orig === null) { orig = el.textContent; el.setAttribute('data-tk-orig', orig); }
+    if (factor === 1) { el.textContent = orig; return; }
+    var parsed = splitAmount(orig);
+    if (!parsed) return;
+    var scaled = parsed.values.map(function (v) { return fmtAmount(v * factor); }).join('\u2013');
+    var rest = parsed.rest;
+    if (parsed.values.length === 1) rest = fixUnit(rest, parsed.values[0] * factor);
+    el.textContent = parsed.prefix + scaled + rest;
+  }
+
+  var articles = Array.prototype.slice.call(document.querySelectorAll('article.recipe'));
+
+  /* ---------- scaler + cooking mode + favorites, per recipe ---------- */
+  articles.forEach(function (article) {
+    var ing = article.querySelector('.ingredients');
+    if (ing) {
+      var h3 = ing.querySelector('h3');
+      var row = document.createElement('div');
+      row.className = 'tk-scale-row';
+      var label = document.createElement('span');
+      label.className = 'tk-scale-label';
+      label.textContent = 'Make: ';
+      row.appendChild(label);
+      [['\u00BD\u00D7', 0.5], ['1\u00D7', 1], ['2\u00D7', 2]].forEach(function (pair) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'tk-scale-btn';
+        b.textContent = pair[0];
+        b.setAttribute('aria-pressed', pair[1] === 1 ? 'true' : 'false');
+        b.addEventListener('click', function () {
+          row.querySelectorAll('.tk-scale-btn').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+          var factor = pair[1];
+          article.querySelectorAll('.ingredients li:not(.ingredient-group) b').forEach(function (el) { scaleText(el, factor); });
+          article.querySelectorAll('.quick-facts .fact').forEach(function (fact) {
+            var sp = fact.querySelector('span');
+            if (sp && (sp.textContent.trim() === 'Serves' || sp.textContent.trim() === 'Makes')) {
+              var strong = fact.querySelector('strong');
+              if (strong) scaleText(strong, factor);
+            }
+          });
+        });
+        row.appendChild(b);
+      });
+      if (h3) h3.parentNode.insertBefore(row, h3.nextSibling);
+      else ing.insertBefore(row, ing.firstChild);
+    }
+
+    var method = article.querySelector('.method');
+    var stepsList = method ? method.querySelector('.steps') : null;
+    if (method && stepsList) {
+      var cookBtn = document.createElement('button');
+      cookBtn.type = 'button';
+      cookBtn.className = 'tk-cook-btn';
+      cookBtn.textContent = 'Cooking mode';
+      cookBtn.addEventListener('click', function () { openCooking(article); });
+      method.insertBefore(cookBtn, stepsList);
+    }
+
+    var jump = article.querySelector('.jump-link');
+    var slug = article.id || '';
+    if (jump && slug) {
+      var fav = document.createElement('button');
+      fav.type = 'button';
+      fav.className = 'tk-fav';
+      fav.setAttribute('data-slug', slug);
+      var renderFav = function () {
+        var saved = loadFavs().indexOf(slug) !== -1;
+        fav.textContent = saved ? '\u2665 Saved' : '\u2661 Save';
+        fav.setAttribute('aria-pressed', String(saved));
+      };
+      fav.addEventListener('click', function () {
+        var f = loadFavs();
+        var i = f.indexOf(slug);
+        if (i === -1) f.push(slug); else f.splice(i, 1);
+        saveFavs(f);
+        renderFav();
+      });
+      renderFav();
+      jump.parentNode.insertBefore(fav, jump.nextSibling);
+    }
+  });
+
+  /* ---------- favorites storage ---------- */
+  function loadFavs() {
+    try { return JSON.parse(localStorage.getItem('tk-favorites') || '[]'); } catch (e) { return []; }
+  }
+  function saveFavs(f) {
+    try { localStorage.setItem('tk-favorites', JSON.stringify(f)); } catch (e) {}
+  }
+
+  /* ---------- cooking mode overlay ---------- */
+  var overlay = document.createElement('div');
+  overlay.className = 'tk-cook-overlay';
+  var panel = document.createElement('div');
+  panel.className = 'tk-cook-panel';
+  var closeBtn = document.createElement('button');
+  closeBtn.type = 'button';
+  closeBtn.className = 'tk-cook-close';
+  closeBtn.setAttribute('aria-label', 'Close cooking mode');
+  closeBtn.textContent = '\u00D7';
+  var countEl = document.createElement('p');
+  countEl.className = 'tk-cook-count';
+  var stepEl = document.createElement('p');
+  stepEl.className = 'tk-cook-step';
+  var nav = document.createElement('div');
+  nav.className = 'tk-cook-nav';
+  var prevBtn = document.createElement('button');
+  prevBtn.type = 'button';
+  prevBtn.textContent = '\u2190 Back';
+  var nextBtn = document.createElement('button');
+  nextBtn.type = 'button';
+  var doneBtn = document.createElement('button');
+  doneBtn.type = 'button';
+  doneBtn.className = 'tk-cook-done';
+  doneBtn.textContent = 'Done';
+  nav.appendChild(prevBtn);
+  nav.appendChild(nextBtn);
+  nav.appendChild(doneBtn);
+  panel.appendChild(closeBtn);
+  panel.appendChild(countEl);
+  panel.appendChild(stepEl);
+  panel.appendChild(nav);
+  overlay.appendChild(panel);
+  document.body.appendChild(overlay);
+
+  var cookSteps = [];
+  var cookIndex = 0;
+  function renderCook() {
+    countEl.textContent = 'Step ' + (cookIndex + 1) + ' of ' + cookSteps.length;
+    stepEl.textContent = cookSteps[cookIndex];
+    prevBtn.disabled = cookIndex === 0;
+    nextBtn.textContent = cookIndex === cookSteps.length - 1 ? 'Done \u2713' : 'Next \u2192';
+  }
+  function closeCooking() { overlay.style.display = 'none'; }
+  function openCooking(article) {
+    var items = article.querySelectorAll('.steps li');
+    if (!items.length) return;
+    cookSteps = Array.prototype.slice.call(items).map(function (li) { return li.textContent.trim().replace(/\s+/g, ' '); });
+    cookIndex = 0;
+    renderCook();
+    overlay.style.display = 'flex';
+  }
+  prevBtn.addEventListener('click', function () { if (cookIndex > 0) { cookIndex -= 1; renderCook(); } });
+  nextBtn.addEventListener('click', function () {
+    if (cookIndex < cookSteps.length - 1) { cookIndex += 1; renderCook(); }
+    else closeCooking();
+  });
+  doneBtn.addEventListener('click', closeCooking);
+  closeBtn.addEventListener('click', closeCooking);
+  overlay.addEventListener('click', function (e) { if (e.target === overlay) closeCooking(); });
+  document.addEventListener('keydown', function (e) {
+    if (overlay.style.display !== 'flex') return;
+    if (e.key === 'Escape') closeCooking();
+    else if (e.key === 'ArrowRight') nextBtn.click();
+    else if (e.key === 'ArrowLeft') prevBtn.click();
+  });
+  window.addEventListener('beforeprint', closeCooking);
+})();
+
+</script>
 </body>
 </html>
